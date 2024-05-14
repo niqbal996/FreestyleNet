@@ -1,0 +1,9 @@
+{
+    "text_label_mapping": {
+      "background": 0,
+      "crop": 1,
+      "weed": 2,
+      "sunny noon": -1
+    },
+    "layout_path": "/netscratch/naeem/sugarbeet_syn_v2/annotations/0000.png"
+}
