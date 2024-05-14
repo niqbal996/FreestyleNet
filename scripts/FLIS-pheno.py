@@ -39,11 +39,11 @@ class PhenoVal(Dataset):
             self.image_paths = f.read().splitlines()
         self._length = len(self.image_paths)
         self.size = size
-        self.interpolation = {"linear": PIL.Image.LINEAR,
-                              "bilinear": PIL.Image.BILINEAR,
-                              "bicubic": PIL.Image.BICUBIC,
-                              "lanczos": PIL.Image.LANCZOS,
-                              }[interpolation]
+        # self.interpolation = {"linear": PIL.Image.LINEAR,
+        #                       "bilinear": PIL.Image.BILINEAR,
+        #                       "bicubic": PIL.Image.BICUBIC,
+        #                       "lanczos": PIL.Image.LANCZOS,
+        #                       }[interpolation]
         with open(json_path, 'r') as f:
             self.data_dict = json.load(f)
         self.text_label_mapping = self.data_dict['text_label_mapping']
@@ -60,9 +60,8 @@ class PhenoVal(Dataset):
         pil_image2 = Image.open(path2)
         pil_image2 = pil_image2.resize((self.size, self.size), resample=PIL.Image.NEAREST)
         label = np.array(pil_image2).astype(np.float32)
-        class_ids = sorted(np.unique(label.astype(np.uint8)))
+        # class_ids = sorted(np.unique(label.astype(np.uint8)))
         example["label"] = label
-        # class_ids_final = np.zeros(3)    # background crop weed global_descriptor 0,1,2,3
         prompt = ''
         class_ids = []
         for text in self.text_label_mapping.keys():
@@ -72,6 +71,8 @@ class PhenoVal(Dataset):
                 num_tokens = self.cal_num_tokens(item)
                 for _ in range(num_tokens):
                     class_ids.append(self.text_label_mapping[text])
+        if class_ids[0] == 0:
+            class_ids = class_ids[1:]
         class_ids = torch.Tensor(class_ids) # .unsqueeze(0)
         prompt = prompt[:-1]
         example["caption"] = prompt
@@ -298,6 +299,7 @@ def main():
                     label = data["label"].to(device)
                     img_name = data["img_name"]
                     class_ids = data["class_ids"].to(device)
+                    text = data["caption"]
                     # tmp = label.cpu().numpy()[0]
                     # img_c = np.zeros((tmp.shape[0], tmp.shape[1], 3))
                     # img = np.zeros_like(tmp)
@@ -306,23 +308,18 @@ def main():
                     # img_c[:,:, 2] = img
                     # Image.fromarray(img.astype(np.uint8)).save(
                     #         os.path.join(outpath, f"{img_name}-mask.jpg"))
-                    # class_ids[0, 0] = 0
-                    # class_ids[0, 1] = 1
-                    # class_ids[0, 2] = 2
-                    # class_ids[0, 3] = 0
-                    # class_ids[0, 4] = 0
-                    text = data["caption"]
-                    
+                    # class_ids = torch.tensor([1.0, 2.0, -1, -1], dtype=torch.float32, device=device).unsqueeze(0)
+                    # text = ['background ' + text[0]]
                     c = model.get_learned_conditioning(text)
                     uc = None
                     if opt.scale != 1.0:
-                        uc = model.get_learned_conditioning(1 * [""])
+                        uc = model.get_learned_conditioning(opt.batch_size * [""])
                     shape = [opt.C, opt.H // opt.f, opt.W // opt.f]
                     samples_ddim, _ = sampler.sample(S=opt.ddim_steps,
                                                         conditioning=c,
                                                         label=label,
                                                         class_ids=class_ids,
-                                                        batch_size=1,
+                                                        batch_size=opt.batch_size,
                                                         shape=shape,
                                                         verbose=False,
                                                         unconditional_guidance_scale=opt.scale,
