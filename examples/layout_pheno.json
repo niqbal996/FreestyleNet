@@ -1,0 +1,8 @@
+{
+    "text_label_mapping": {
+      "crop": 1,
+      "weed": 2,
+      "sunshine and dry ground": -1
+    },
+    "layout_path": "/netscratch/naeem/sugarbeet_syn_v1/flis_images/0079.png"
+  }

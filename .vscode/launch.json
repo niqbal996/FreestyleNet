@@ -5,20 +5,75 @@
     "version": "0.2.0",
     "configurations": [
         {
+            "name": "LIS",
+            "type": "python",
+            "request": "launch",
+            "program": "scripts/LIS.py",
+            "console": "integratedTerminal",
+            "args": [
+                "--batch_size", "1",
+                "--config", "configs/stable-diffusion/v1-finetune_Pheno.yaml",
+                "--ckpt", "/netscratch/naeem/freestyle_logs/2024-05-12T01-42-35_phenobench_global_lighting_20k/checkpoints/last.ckpt",
+                "--dataset", "Phenobench",
+                "--outdir", "/netscratch/naeem/cocostuff/phenobench_synthetic/",
+                "--txt_file", "/netscratch/naeem/cocostuff/phenobench_synthetic/pheno_test.txt",
+                "--data_root", "/netscratch/naeem/cocostuff/phenobench_synthetic/",
+                "--W", "1024", 
+                "--H", "1024",
+                "--plms"
+            ]
+        },
+        {
+            "name": "check",
+            "type": "python",
+            "request": "launch",
+            "program": "scripts/check_labels.py",
+            "console": "integratedTerminal"
+        },
+        {
+            "name": "FLIS",
+            "type": "python",
+            "request": "launch",
+            "program": "scripts/FLIS-pheno.py",
+            "console": "integratedTerminal",
+            "args": [
+                "--batch_size", "1",
+                "--config", "configs/stable-diffusion/v1-finetune_Pheno.yaml",
+                "--ckpt", "/netscratch/naeem/freestyle_logs/2024-03-15T12-16-05_phenobench_coco_long_run/checkpoints/last.ckpt",
+                "--json", "/netscratch/naeem/sugarbeet_syn_v2/flis_images/layout_morning.json",
+                "--outdir", "/netscratch/naeem/sugarbeet_syn_v2/flis_images/flis_morning",
+                "--txt_file", "/netscratch/naeem/sugarbeet_syn_v2/pheno_syn_v2.txt",
+                "--data_root", "/netscratch/naeem/sugarbeet_syn_v2/",
+                "--W", "1024", 
+                "--H", "1024",
+                "--plms"
+            ]
+        },
+        {
             "name": "Train",
             "type": "python",
             "request": "launch",
             "program": "main.py",
             "console": "integratedTerminal",
             "args": [
-                "--base", "configs/stable-diffusion/v1-finetune_COCO.yaml",
-               "-t", 
-               "--actual_resume", "models/ldm/stable-diffusion/sd-v1-4-full-ema.ckpt",
-               "-n", "phenobench",
-               "--gpus", "0",
-               "--data_root",  "/path/to/dataset",
-               "--train_txt_file", "/path/to/dataset/with/train.txt",
-               "--val_txt_file", "/path/to/dataset/with/val.txt"
+                "--base",
+                "configs/stable-diffusion/v1-finetune_Pheno.yaml",
+                "-t",
+                //    "--actual_resume", "models/ldm/stable-diffusion/sd-v1-4-full-ema.ckpt",
+                "--actual_resume",
+                "/netscratch/naeem/cocostuff/freestyle-sd-v1-4-coco.ckpt",
+                "-n",
+                "phenobench_coco",
+                "--logdir",
+                "/netscratch/naeem/freestyle_logs/",
+                "--gpus",
+                "0,",
+                "--data_root",
+                "/netscratch/naeem/cocostuff/phenobench_cocostuff/",
+                "--train_txt_file",
+                "/netscratch/naeem/cocostuff/phenobench_cocostuff/pheno_train.txt",
+                "--val_txt_file",
+                "/netscratch/naeem/cocostuff/phenobench_cocostuff/pheno_val.txt"
             ],
             "justMyCode": true
         },
